@@ -1,7 +1,5 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import plotly.express as px
 
 import random
 import torchvision.transforms as transforms
@@ -15,11 +13,11 @@ def load_data():
     '''
     TO-DO
     '''
-    from data_loader import ds, dataset, dataloader, class_names, invTrans
-    return ds, dataset, dataloader, class_names, invTrans
+    from data.CAN_dataset import ds, dataset, class_names, invTrans
+    return ds, dataset, class_names, invTrans
 
 # Will only run once if already cached
-ds, dataset, dataloader, class_names, invTrans = load_data()
+ds, dataset, class_names, invTrans = load_data()
 
 def manage_progress():
     '''
