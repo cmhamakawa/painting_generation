@@ -8,6 +8,17 @@ from constants import *
 import streamlit as st
 import time
 
+from dcgan_model import *
+from io import BytesIO
+from torchvision.utils import save_image
+
+
+
+
+# dcgan module
+# import torch
+# import torch.nn as nn
+
 @st.cache_data
 def load_data():
     '''
@@ -93,6 +104,7 @@ def plot_transformations(viz_idx):
     ax[1][1].set_title('Normalize')
 
     return fig
+    
 
 # TO-DO:
 
@@ -109,6 +121,7 @@ def plot_transformations(viz_idx):
 def main():
 
     page = st.sidebar.selectbox("Choose a page", ["Homepage", "Generation", "Real Or Fake?"])
+    dcgan_generator, dcgan_discriminator = load_dcgan_models()
     if page == "Homepage":
         st.header("Painting Data Exploration")
         st.write(
@@ -141,7 +154,9 @@ def main():
 
     elif page == "Generation":
         st.title("Painting Generation")
-        st.subheader('Sorry, under construction: 🚧')
+        fig, image = dcgan_generate_images(dcgan_generator, dcgan_discriminator)
+#         fixed_noise = dcgan_fixed_noise()
+#         dcgan_generator, dcgan_discriminator = load_dcgan_models()
         result = st.button("Magic Generator!", on_click=manage_progress)
         if result and st.session_state.in_progress == 1:
 
@@ -157,33 +172,41 @@ def main():
                 time.sleep(0.1)
 
             st.write("Generated image:")
-
+            fig, image = dcgan_generate_images(dcgan_generator, dcgan_discriminator)
+            st.write(fig)
+        
+        save_image(image[0], 'testing.png')
+        img = Image.open("testing.png")
+        download = st.button("Download the image:")
+        if download:
+            buf = BytesIO()
+            #image2.save(buf, format="png")
+            #byte_im = buf.getvalue()
+            with open("testing.png", "rb") as file:
+                btn = st.download_button(
+                    label="Click here to download image!",
+                    data=file,
+                    file_name="testing.png",
+                    mime="image/png"
+                 )
             st.write(":smile:")
             st.session_state.in_progress = 0
+        
 
         elif result and st.session_state.in_progress == 0:
             st.write("You've clicked it already! Image generation stopped.\n\n"
                      "To re-generate your painting, please click again.")
 
-        download = st.button("Download the image:")
-        if download:
-            st.write(":D")
-            # with open("testing.png", "rb") as file:
-            #     btn = st.download_button(
-            #         label="Download image",
-            #         data=file,
-            #         file_name="testing.png",
-            #         mime="image/png"
-            #     )
 
     else:
         st.title("Real or Fake?")
-        st.subheader('Sorry, under construction: 🚧')
         file = st.file_uploader(label='Upload an image:')
         if file is not None:
             image_data = file.getvalue()
             st.image(image_data)
-
+            real_prob = image_classifier(dcgan_discriminator, file)
+            reported_probability = "The scalar percentage that this is a real image is " + real_prob + "%."
+            st.subheader(reported_probability)
 
 if __name__ == "__main__":
     main()

@@ -59,8 +59,8 @@ def load_dcgan_models():
     subset_size = 5000
         
     # generator and discriminator (may not need discriminator)
-    model_nameD = "model_5000_44D.pt" # TODO: CHANGE LATER
-    model_nameG = "model_5000_44G.pt" # Idea: report error to show how closely it resembles a painting?
+    model_nameG = "dcgan_models/DCGAN_gen_epoch_5000_44.pt" # TODO: CHANGE LATER
+    model_nameD = "dcgan_models/DCGAN_disc_epoch_5000_44.pt" # Idea: report error to show how closely it resembles a painting?
     device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
 
     
@@ -70,9 +70,9 @@ def load_dcgan_models():
     # NOTE currently the lower code adds CPU. this is because im loading rn w/o GPU access. otherwise use version directly below
     # gen.load_state_dict(torch.load('/content/drive/MyDrive/Pic 16B/CAN/CAN_gen_epoch_12.pt')["model_state_dict"]) # currently set to 12
     # disc.load_state_dict(torch.load('/content/drive/MyDrive/Pic 16B/CAN/CAN_disc_epoch_12.pt')["model_state_dict"])
-    gen.load_state_dict(torch.load('DCGAN_gen_epoch_5000_44.pt',
+    gen.load_state_dict(torch.load(model_nameG,
                                    map_location=torch.device('cpu'))["model_state_dict"]) # currently set to 12
-    disc.load_state_dict(torch.load('DCGAN_disc_epoch_5000_44.pt',
+    disc.load_state_dict(torch.load(model_nameD,
                                     map_location=torch.device('cpu'))["model_state_dict"])
     
 #    modelD = torch.load(model_nameD)
