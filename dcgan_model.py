@@ -75,8 +75,7 @@ def load_dcgan_models():
     disc.load_state_dict(torch.load(model_nameD,
                                     map_location=torch.device('cpu'))["model_state_dict"])
     
-#    modelD = torch.load(model_nameD)
-#    modelG = torch.load(model_nameG)
+
     
     return gen, disc
 def dcgan_fixed_noise():
