@@ -11,7 +11,8 @@ import time
 from dcgan_model import *
 from io import BytesIO
 from torchvision.utils import save_image
-
+from PIL import Image
+from streamlit_cropper import st_cropper
 
 
 
@@ -153,8 +154,10 @@ def main():
             st.write(plot_transformations(idx))
 
     elif page == "Generation":
+        download = False
         st.title("Painting Generation")
         fig, image = dcgan_generate_images(dcgan_generator, dcgan_discriminator)
+        save_image(image[0], 'testing.png')
 #         fixed_noise = dcgan_fixed_noise()
 #         dcgan_generator, dcgan_discriminator = load_dcgan_models()
         result = st.button("Magic Generator!", on_click=manage_progress)
@@ -173,24 +176,25 @@ def main():
 
             st.write("Generated image:")
             fig, image = dcgan_generate_images(dcgan_generator, dcgan_discriminator)
-            st.write(fig)
-        
-        save_image(image[0], 'testing.png')
-        img = Image.open("testing.png")
-        download = st.button("Download the image:")
-        if download:
+            save_image(image[0], 'testing.png')
+            img = Image.open("testing.png")
             buf = BytesIO()
-            #image2.save(buf, format="png")
-            #byte_im = buf.getvalue()
-            with open("testing.png", "rb") as file:
+            img.save(buf, format="png")
+            byte_im = buf.getvalue()
+            st.write(fig)
+            download = True
+            # save_image(image[0], 'testing.png')
+            # download = st.button("Download the image:")
+            if download:
+                # img = Image.open("testing.png")
                 btn = st.download_button(
                     label="Click here to download image!",
-                    data=file,
+                    data=byte_im,
                     file_name="testing.png",
                     mime="image/png"
                  )
-            st.write(":smile:")
-            st.session_state.in_progress = 0
+                st.write(":smile:")
+                # st.session_state.in_progress = 0
         
 
         elif result and st.session_state.in_progress == 0:
@@ -203,7 +207,32 @@ def main():
         file = st.file_uploader(label='Upload an image:')
         if file is not None:
             image_data = file.getvalue()
-            st.image(image_data)
+            image = Image.open(file)
+            # MAKE A FUNCTION
+            width  = image.size[0]
+            height = image.size[1]
+            
+            aspect = width / float(height)
+            
+            ideal_width = 300
+            ideal_height = 300
+            
+            ideal_aspect = ideal_width / float(ideal_height)
+            
+            if aspect > ideal_aspect:
+                # Then crop the left and right edges:
+                new_width = int(ideal_aspect * height)
+                offset = (width - new_width) / 2
+                resize = (offset, 0, width - offset, height)
+            else:
+                # ... crop the top and bottom:
+                new_height = int(width / ideal_aspect)
+                offset = (height - new_height) / 2
+                resize = (0, offset, width, height - offset)
+            
+            new_image = image.crop(resize).resize((ideal_width, ideal_height), Image.ANTIALIAS)
+            # make a function
+            st.image(new_image)
             real_prob = image_classifier(dcgan_discriminator, file)
             reported_probability = "The scalar percentage that this is a real image is " + real_prob + "%."
             st.subheader(reported_probability)
