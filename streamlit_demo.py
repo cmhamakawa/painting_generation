@@ -158,8 +158,6 @@ def main():
         st.title("Painting Generation")
         fig, image = dcgan_generate_images(dcgan_generator, dcgan_discriminator)
         save_image(image[0], 'testing.png')
-#         fixed_noise = dcgan_fixed_noise()
-#         dcgan_generator, dcgan_discriminator = load_dcgan_models()
         result = st.button("Magic Generator!", on_click=manage_progress)
         if result and st.session_state.in_progress == 1:
 
@@ -183,10 +181,7 @@ def main():
             byte_im = buf.getvalue()
             st.write(fig)
             download = True
-            # save_image(image[0], 'testing.png')
-            # download = st.button("Download the image:")
             if download:
-                # img = Image.open("testing.png")
                 btn = st.download_button(
                     label="Click here to download image!",
                     data=byte_im,
@@ -194,8 +189,6 @@ def main():
                     mime="image/png"
                  )
                 st.write(":smile:")
-                # st.session_state.in_progress = 0
-        
 
         elif result and st.session_state.in_progress == 0:
             st.write("You've clicked it already! Image generation stopped.\n\n"
@@ -208,7 +201,6 @@ def main():
         if file is not None:
             image_data = file.getvalue()
             image = Image.open(file)
-            # MAKE A FUNCTION
             width  = image.size[0]
             height = image.size[1]
             
@@ -231,7 +223,6 @@ def main():
                 resize = (0, offset, width, height - offset)
             
             new_image = image.crop(resize).resize((ideal_width, ideal_height), Image.ANTIALIAS)
-            # make a function
             st.image(new_image)
             real_prob = image_classifier(dcgan_discriminator, file)
             reported_probability = "The scalar percentage that this is a real image is " + real_prob + "%."
